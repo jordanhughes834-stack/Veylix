@@ -188,9 +188,12 @@ function draftExerciseIds(){
   return list.filter(function(id){ return exerciseById(id); });
 }
 function draftVolume(){
-  var d = ensureDraft(); var total = 0;
-  Object.keys(d.entries).forEach(function(exId){
-    d.entries[exId].forEach(function(s){ total += (s.weight||0) * (s.reps||0); });
+  return volumeOf(ensureDraft().entries);
+}
+function volumeOf(entries){
+  var total = 0;
+  Object.keys(entries).forEach(function(exId){
+    entries[exId].forEach(function(s){ total += (s.weight||0) * (s.reps||0); });
   });
   return total;
 }
@@ -567,8 +570,9 @@ function renderSessionCard(sess){
   html += '<div class="session-body' + (open?" open":"") + '" data-body="' + sess.id + '">';
   Object.keys(sess.entries).forEach(function(exId){
     html += '<div class="session-ex"><div class="session-ex-name">' + esc(exerciseName(exId)) + '</div>';
-    sess.entries[exId].forEach(function(s){
-      html += '<div class="session-set-line"><span class="dot" style="background:var(--rate-' + s.difficulty + ')"></span>' + fmtNum(s.weight) + 'kg × ' + s.reps + '</div>';
+    sess.entries[exId].forEach(function(s, i){
+      html += '<div class="session-set-line"><span class="dot" style="background:var(--rate-' + s.difficulty + ')"></span>' + fmtNum(s.weight) + 'kg × ' + s.reps
+        + '<button class="rm" data-rm-session-set="' + i + '" data-session="' + sess.id + '" data-exid="' + esc(exId) + '" title="Remove this set">' + SVG_X + '</button></div>';
     });
     html += '</div>';
   });
@@ -594,6 +598,28 @@ function handleHistoryClick(e){
       renderHistory();
       toast("Session deleted");
     });
+    return;
+  }
+  var rmSet = e.target.closest("[data-rm-session-set]");
+  if(rmSet){
+    var sessId = rmSet.getAttribute("data-session");
+    var exId = rmSet.getAttribute("data-exid");
+    var idx = parseInt(rmSet.getAttribute("data-rm-session-set"),10);
+    var sess = null;
+    for(var i=0;i<state.sessions.length;i++){ if(state.sessions[i].id===sessId){ sess = state.sessions[i]; break; } }
+    if(!sess || !sess.entries[exId]) return;
+    sess.entries[exId].splice(idx,1);
+    if(sess.entries[exId].length===0) delete sess.entries[exId];
+    if(Object.keys(sess.entries).length===0){
+      state.sessions = state.sessions.filter(function(s){ return s.id !== sessId; });
+      delete openSessions[sessId];
+      toast("Set removed — that was the last one, so the session was removed too");
+    } else {
+      sess.volume = volumeOf(sess.entries);
+      toast("Set removed");
+    }
+    save();
+    renderHistory();
     return;
   }
 }
