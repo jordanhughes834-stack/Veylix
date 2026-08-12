@@ -156,7 +156,9 @@
   .set-row .idx{color:var(--ink-faint); font-size:.74rem;}
   .set-row .val{font-variant-numeric:tabular-nums;}
   .set-row .dot{width:9px; height:9px; border-radius:50%; justify-self:start;}
-  .set-row .rm{color:var(--ink-faint); background:none; border:none; cursor:pointer; padding:2px;}
+  .set-row .rm{color:var(--ink-faint); background:none; border:none; cursor:pointer; padding:8px; margin:-8px; display:flex; align-items:center; justify-content:center;}
+  .set-row .rm svg{width:16px; height:16px;}
+  .set-row .rm:active{color:var(--danger);}
 
   .set-input-row{display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap;}
   .set-input-row .num-field{flex:1 1 64px; min-width:64px;}
