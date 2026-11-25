@@ -139,14 +139,6 @@
   input:focus, select:focus{border-color:var(--accent);}
   label.field{display:flex; flex-direction:column; gap:4px; font-size:.72rem; color:var(--ink-dim); text-transform:uppercase; letter-spacing:.05em;}
 
-  /* ---------- Today: day switch chips ---------- */
-  .daytype-switch{display:flex; gap:8px; overflow-x:auto; padding-bottom:2px;}
-  .chip{
-    flex:0 0 auto; background:var(--surface); border:1px solid var(--line); color:var(--ink-dim);
-    padding:7px 14px; border-radius:99px; font-size:.8rem; font-weight:600; cursor:pointer; white-space:nowrap;
-  }
-  .chip.active{background:var(--accent); border-color:var(--accent); color:var(--accent-ink);}
-
   .rest-card{padding:26px 20px; text-align:center; display:flex; flex-direction:column; gap:10px; align-items:center;}
   .rest-card .big{font-family:var(--font-display); font-size:1.6rem; letter-spacing:.02em;}
   .rest-card p{color:var(--ink-dim); font-size:.88rem; max-width:32ch;}
@@ -193,8 +185,14 @@
 
   .add-set-btn{flex:0 0 auto;}
 
-  .extra-row{display:flex; gap:8px;}
-  .extra-row select{flex:1;}
+  .ex-picker-add{display:flex; flex-direction:column; gap:8px;}
+  .ex-search-create{align-self:flex-start;}
+  .ex-search-results{max-height:220px; overflow-y:auto; display:flex; flex-direction:column; gap:2px; border:1px solid var(--line); border-radius:var(--radius-s); padding:4px;}
+  .ex-search-group-label{font-size:.68rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-faint); padding:8px 8px 2px;}
+  .ex-search-item{display:block; width:100%; text-align:left; background:none; border:none; padding:8px; border-radius:var(--radius-s); font-size:.86rem; color:var(--ink); cursor:pointer;}
+  .ex-search-item:hover, .ex-search-item:active{background:var(--surface-2);}
+  .ex-search-item.active{background:var(--accent-soft); color:var(--accent); font-weight:700;}
+  .ex-search-empty{padding:10px; font-size:.84rem; color:var(--ink-faint);}
 
   .finish-bar{
     position:fixed; left:0; right:0; bottom:calc(64px + env(safe-area-inset-bottom)); z-index:15;
@@ -211,8 +209,6 @@
   .finish-bar-timer strong{color:var(--accent); font-size:1rem;}
 
   /* ---------- History ---------- */
-  .progress-picker{display:flex; gap:8px; align-items:center;}
-  .progress-picker select{flex:1;}
   .chart-wrap{padding:14px; overflow-x:auto;}
   .chart-empty{color:var(--ink-faint); font-size:.82rem; text-align:center; padding:20px 0;}
 

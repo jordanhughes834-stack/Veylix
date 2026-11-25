@@ -496,16 +496,10 @@ function renderToday(){
   var root = document.getElementById("view-today");
   var html = "";
 
-  html += '<div class="daytype-switch">';
-  dayTypeNames().concat(["Rest"]).forEach(function(dt){
-    html += '<button class="chip' + (dt===d.dayType?" active":"") + '" data-daytype="' + esc(dt) + '">' + esc(dt) + '</button>';
-  });
-  html += '</div>';
-
   if(!d.startedAt){
     html += '<div class="card rest-card">'
       + '<div class="big">Ready to train?</div>'
-      + '<p>Start your workout to begin logging sets. You can log any mix of exercises - the day type above is just a label, not a restriction.</p>'
+      + '<p>Start your workout to begin logging sets. You can log any mix of exercises, regardless of what\'s scheduled.</p>'
       + '<button class="btn btn-accent btn-block" id="startWorkoutBtn">Start Workout</button>'
       + '</div>';
   } else {
@@ -513,9 +507,11 @@ function renderToday(){
     ids.forEach(function(exId){
       html += renderExerciseCard(exId, d);
     });
-    html += '<div class="extra-row"><select id="extraExSelect"><option value="">+ Add an exercise…</option>'
-      + exerciseOptionsByCategory(ids)
-      + '</select></div>';
+    html += '<div class="ex-picker-add">'
+      + '<input type="text" class="ex-search-input" id="todayExSearch" placeholder="Search exercises to add…" autocomplete="off" value="' + esc(todayExSearchQuery) + '">'
+      + '<button type="button" class="btn btn-line btn-sm ex-search-create" id="todayExCreateBtn">+ Create a new exercise</button>'
+      + '<div class="ex-search-results" id="todayExResults">' + renderExerciseResultsHtml(matchingExerciseGroups(todayExSearchQuery, ids)) + '</div>'
+      + '</div>';
   }
 
   root.innerHTML = html;
@@ -533,22 +529,35 @@ function renderToday(){
   renderHeader();
 }
 
-// Builds <optgroup> options grouped by muscle group, excluding ids already
-// in use - this is the free-mix exercise picker: pick any exercise from any
-// category, not just whatever's scheduled for today.
-function exerciseOptionsByCategory(excludeIds){
+// Shared search-with-groups exercise picker, used by Today's add-exercise
+// flow and History's progress-chart picker: filters by name (case
+// insensitive substring), grouped by muscle group, excluding ids already
+// in use. Free-mix on purpose - any exercise from any category, not just
+// whatever's scheduled for today.
+function matchingExerciseGroups(query, excludeIds){
+  var q = (query||"").trim().toLowerCase();
   var byCat = {};
   var order = [];
   state.exercises.forEach(function(e){
-    if(excludeIds.indexOf(e.id)!==-1) return;
+    if(excludeIds && excludeIds.indexOf(e.id)!==-1) return;
+    if(q && e.name.toLowerCase().indexOf(q)===-1) return;
     var cat = e.category || "Other";
     if(!byCat[cat]){ byCat[cat] = []; order.push(cat); }
     byCat[cat].push(e);
   });
-  return order.map(function(cat){
-    return '<optgroup label="' + esc(cat) + '">'
-      + byCat[cat].map(function(e){ return '<option value="' + esc(e.id) + '">' + esc(e.name) + '</option>'; }).join("")
-      + '</optgroup>';
+  return order.map(function(cat){ return {cat:cat, items:byCat[cat]}; });
+}
+function renderExerciseResultsHtml(groups, opts){
+  opts = opts || {};
+  if(groups.length===0){
+    return '<div class="ex-search-empty">No matches.</div>';
+  }
+  return groups.map(function(g){
+    return '<div class="ex-search-group"><div class="ex-search-group-label">' + esc(g.cat) + '</div>'
+      + g.items.map(function(e){
+          return '<button type="button" class="ex-search-item' + (opts.activeId===e.id?" active":"") + '" data-exid="' + esc(e.id) + '">' + esc(e.name) + '</button>';
+        }).join("")
+      + '</div>';
   }).join("");
 }
 
@@ -578,7 +587,7 @@ function renderExerciseCard(exId, d){
   // Weight/reps inputs start blank each render (including right after adding a set) so
   // there's nothing to clear by hand — the suggestion is shown as a placeholder hint instead.
   var phW = sets.length ? fmtNum(sets[sets.length-1].weight) : (sug.weight==null? "" : fmtNum(sug.weight));
-  var phR = sets.length ? sets[sets.length-1].reps : sug.reps;
+  var phR = sets.length ? sets[sets.length-1].reps : (sug.weight==null ? "" : sug.reps);
 
   html += '<div class="set-input-row">'
     + '<div class="num-field"><label class="field">Kg<input type="number" step="0.5" inputmode="decimal" class="w-input" placeholder="' + esc(phW) + '"></label></div>'
@@ -602,16 +611,9 @@ function renderExerciseCard(exId, d){
 }
 
 var pendingDifficulty = {}; // exId -> selected level (per-card transient UI state)
+var todayExSearchQuery = "";
 
 function handleTodayClick(e){
-  var chip = e.target.closest("[data-daytype]");
-  if(chip){
-    var d = ensureDraft();
-    d.dayType = chip.getAttribute("data-daytype");
-    save();
-    renderToday();
-    return;
-  }
   var startBtn = e.target.closest("#startWorkoutBtn");
   if(startBtn){
     var dStart = ensureDraft();
@@ -659,16 +661,37 @@ function handleTodayClick(e){
     renderToday();
     return;
   }
+  var searchItem = e.target.closest("#todayExResults .ex-search-item");
+  if(searchItem){
+    var exId4 = searchItem.getAttribute("data-exid");
+    var d4 = ensureDraft();
+    if(d4.extras.indexOf(exId4)===-1) d4.extras.push(exId4);
+    todayExSearchQuery = "";
+    save();
+    renderToday();
+    return;
+  }
+  var createBtn = e.target.closest("#todayExCreateBtn");
+  if(createBtn){
+    openExerciseForm({
+      prefillName: todayExSearchQuery,
+      onCreated: function(newEx){
+        var d5 = ensureDraft();
+        if(d5.extras.indexOf(newEx.id)===-1) d5.extras.push(newEx.id);
+        todayExSearchQuery = "";
+        save();
+        renderToday();
+      }
+    });
+    return;
+  }
 }
-function handleTodayChange(e){
-  if(e.target.id === "extraExSelect"){
-    var val = e.target.value;
-    if(val){
-      var d = ensureDraft();
-      if(d.extras.indexOf(val)===-1) d.extras.push(val);
-      save();
-      renderToday();
-    }
+function handleTodayInput(e){
+  if(e.target.id === "todayExSearch"){
+    todayExSearchQuery = e.target.value;
+    var ids = draftExerciseIds();
+    document.getElementById("todayExResults").innerHTML =
+      renderExerciseResultsHtml(matchingExerciseGroups(todayExSearchQuery, ids));
   }
 }
 
@@ -730,18 +753,18 @@ function showFinishModal(session, sets, reps){
 /* ============================= RENDER: HISTORY ============================= */
 var openSessions = {};
 var progressExId = null;
+var historyExSearchQuery = "";
 
 function renderHistory(){
   var root = document.getElementById("view-history");
   var html = "";
 
-  html += '<div class="card chart-wrap">';
-  html += '<div class="progress-picker"><select id="progressSelect">';
   if(!progressExId && state.exercises.length) progressExId = state.exercises[0].id;
-  state.exercises.forEach(function(e){
-    html += '<option value="' + esc(e.id) + '"' + (e.id===progressExId?" selected":"") + '>' + esc(e.name) + '</option>';
-  });
-  html += '</select></div>';
+  html += '<div class="card chart-wrap">';
+  html += '<div class="ex-picker-add">'
+    + '<input type="text" class="ex-search-input" id="historyExSearch" placeholder="Search exercises…" autocomplete="off" value="' + esc(historyExSearchQuery) + '">'
+    + '<div class="ex-search-results" id="historyExResults">' + renderExerciseResultsHtml(matchingExerciseGroups(historyExSearchQuery), {activeId:progressExId}) + '</div>'
+    + '</div>';
   html += '<div id="chartHost">' + renderChart(progressExId) + '</div>';
   html += '</div>';
 
@@ -858,11 +881,19 @@ function handleHistoryClick(e){
     renderHistory();
     return;
   }
+  var searchItem = e.target.closest("#historyExResults .ex-search-item");
+  if(searchItem){
+    progressExId = searchItem.getAttribute("data-exid");
+    historyExSearchQuery = "";
+    renderHistory();
+    return;
+  }
 }
-function handleHistoryChange(e){
-  if(e.target.id === "progressSelect"){
-    progressExId = e.target.value;
-    document.getElementById("chartHost").innerHTML = renderChart(progressExId);
+function handleHistoryInput(e){
+  if(e.target.id === "historyExSearch"){
+    historyExSearchQuery = e.target.value;
+    document.getElementById("historyExResults").innerHTML =
+      renderExerciseResultsHtml(matchingExerciseGroups(historyExSearchQuery), {activeId:progressExId});
   }
 }
 
@@ -1105,10 +1136,11 @@ function openDayTypeForm(){
     save(); closeFormModal(); renderManage();
   };
 }
-function openExerciseForm(){
+function openExerciseForm(opts){
+  opts = opts || {};
   var html = '<div class="modal-head"><h2>New exercise</h2><button class="icon-btn" id="cancelForm">' + SVG_X + '</button></div>'
     + '<div class="form-grid">'
-    + '<label class="field">Name<input type="text" id="newExName" placeholder="e.g. Cable Fly"></label>'
+    + '<label class="field">Name<input type="text" id="newExName" placeholder="e.g. Cable Fly" value="' + esc(opts.prefillName||"") + '"></label>'
     + '<div class="form-row-2">'
     + '<label class="field">Category<input type="text" id="newExCat" placeholder="Push"></label>'
     + '<label class="field">Weight step (kg)<input type="number" id="newExInc" value="2.5" step="0.25"></label>'
@@ -1122,8 +1154,10 @@ function openExerciseForm(){
     var cat = document.getElementById("newExCat").value.trim();
     var inc = parseFloat(document.getElementById("newExInc").value) || 2.5;
     if(!name){ toast("Enter a name"); return; }
-    state.exercises.push({id: uid(), name: name, category: cat, increment: inc});
-    save(); closeFormModal(); renderManage();
+    var newEx = {id: uid(), name: name, category: cat || "Other", increment: inc};
+    state.exercises.push(newEx);
+    save(); closeFormModal();
+    if(opts.onCreated) opts.onCreated(newEx); else renderManage();
   };
 }
 
@@ -1168,6 +1202,11 @@ function importBackup(file){
 }
 
 /* ============================= TABS / INIT ============================= */
+// Re-renders whichever view is being switched to, rather than just
+// toggling visibility on whatever was last rendered - otherwise edits made
+// on one tab (e.g. renaming an exercise in Manage) don't show up on
+// another (e.g. Today's exercise picker) until something else happens to
+// trigger a re-render.
 function setActiveTab(tab){
   document.querySelectorAll(".tab-btn").forEach(function(b){
     b.classList.toggle("active", b.getAttribute("data-tab")===tab);
@@ -1175,6 +1214,10 @@ function setActiveTab(tab){
   document.querySelectorAll(".view").forEach(function(v){
     v.classList.toggle("active", v.id === "view-"+tab);
   });
+  if(tab==="home") renderHome();
+  else if(tab==="today") renderToday();
+  else if(tab==="history") renderHistory();
+  else if(tab==="manage") renderManage();
   document.getElementById("finishBar").style.display = (tab==="today" && state.draft && state.draft.startedAt) ? "" : "none";
   window.scrollTo(0,0);
 }
@@ -1227,10 +1270,10 @@ function startApp(){
   document.getElementById("finishWorkoutBtn").addEventListener("click", finishWorkout);
 
   document.getElementById("view-today").addEventListener("click", handleTodayClick);
-  document.getElementById("view-today").addEventListener("change", handleTodayChange);
+  document.getElementById("view-today").addEventListener("input", handleTodayInput);
 
   document.getElementById("view-history").addEventListener("click", handleHistoryClick);
-  document.getElementById("view-history").addEventListener("change", handleHistoryChange);
+  document.getElementById("view-history").addEventListener("input", handleHistoryInput);
 
   document.getElementById("view-manage").addEventListener("click", handleManageClick);
   document.getElementById("view-manage").addEventListener("change", handleManageChange);
