@@ -1673,6 +1673,16 @@ if(document.readyState === "loading"){
 </script>
 <script>
   if("serviceWorker" in navigator){
+    var swRefreshing = false;
+    navigator.serviceWorker.addEventListener("controllerchange", function(){
+      // Fires when a newly-deployed service worker takes over from an old
+      // one (thanks to skipWaiting()+clients.claim() in service-worker.js) -
+      // reload once so the page picks up the fresh app.js/CSS it now
+      // controls, instead of leaving stale JS running against new assets.
+      if(swRefreshing) return;
+      swRefreshing = true;
+      window.location.reload();
+    });
     window.addEventListener("load", function(){
       navigator.serviceWorker.register("service-worker.js").catch(function(){});
     });
