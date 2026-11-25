@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Veylix</title>
 <meta name="description" content="Personal training log - track sets, reps, and progression.">
-<meta name="theme-color" content="#1E9E6B">
+<meta name="theme-color" content="#B7F34A">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Veylix">
@@ -21,7 +21,7 @@
     --bg:#EEF0F3; --surface:#FFFFFF; --surface-2:#E3E7EC; --surface-3:#D8DDE4;
     --ink:#12161C; --ink-dim:#5C6673; --ink-faint:#8C93A0;
     --line:#D6DBE1; --line-strong:#C1C8D1;
-    --accent:#1E9E6B; --accent-ink:#FFFFFF; --accent-soft:#E1F3EA; --accent-dim:#6FAE93;
+    --accent:#6DA30B; --accent-ink:#FFFFFF; --accent-soft:#EAF6D0; --accent-dim:#8FAE5C;
     --rate-1:#3B82C9; --rate-2:#7C9BB0; --rate-3:#E0B23A; --rate-4:#E2793D; --rate-5:#D9434E;
     --danger:#D9434E; --danger-soft:#FBE4E5;
     --radius-s:8px; --radius-m:14px; --radius-l:22px;
@@ -36,7 +36,7 @@
       --bg:#121714; --surface:#1A2019; --surface-2:#212820; --surface-3:#2A332A;
       --ink:#ECF1ED; --ink-dim:#9BA8A0; --ink-faint:#67726B;
       --line:#26302A; --line-strong:#334039;
-      --accent:#34C98A; --accent-ink:#08140F; --accent-soft:#16271F; --accent-dim:#2F6B52;
+      --accent:#B7F34A; --accent-ink:#101216; --accent-soft:#1E2A12; --accent-dim:#7FA83D;
       --rate-1:#5B9FE0; --rate-2:#93AEC2; --rate-3:#F0C24A; --rate-4:#F08A4B; --rate-5:#EF525C;
       --danger:#EF525C; --danger-soft:#3B1F22;
       --shadow-1:0 1px 2px rgba(0,0,0,.4), 0 8px 20px rgba(0,0,0,.35);
@@ -47,7 +47,7 @@
     --bg:#121714; --surface:#1A2019; --surface-2:#212820; --surface-3:#2A332A;
     --ink:#ECF1ED; --ink-dim:#9BA8A0; --ink-faint:#67726B;
     --line:#26302A; --line-strong:#334039;
-    --accent:#34C98A; --accent-ink:#08140F; --accent-soft:#16271F; --accent-dim:#2F6B52;
+    --accent:#B7F34A; --accent-ink:#101216; --accent-soft:#1E2A12; --accent-dim:#7FA83D;
     --rate-1:#5B9FE0; --rate-2:#93AEC2; --rate-3:#F0C24A; --rate-4:#F08A4B; --rate-5:#EF525C;
     --danger:#EF525C; --danger-soft:#3B1F22;
     --shadow-1:0 1px 2px rgba(0,0,0,.4), 0 8px 20px rgba(0,0,0,.35);
@@ -78,7 +78,7 @@
     display:flex; align-items:center; justify-content:space-between; gap:10px;
   }
   .brand{display:flex; align-items:center; gap:7px; font-family:var(--font-display); font-size:1.5rem; letter-spacing:.04em; line-height:1; color:var(--ink); flex:0 0 auto;}
-  .brand-mark{width:20px; height:20px; flex:0 0 auto;}
+  .brand-mark{width:22px; height:22px; flex:0 0 auto; border-radius:5px; display:block;}
   .today-meta{display:flex; flex-direction:column; align-items:flex-end; gap:4px; min-width:0; text-align:right;}
   .today-date{font-size:.72rem; color:var(--ink-dim); text-transform:uppercase; letter-spacing:.08em;}
   .pill{
@@ -311,7 +311,7 @@
 <div class="app" id="authGate" style="display:none;">
   <div class="auth-wrap">
     <div class="card auth-card" style="padding:22px;">
-      <div class="brand" style="font-size:1.9rem; margin-bottom:4px;"><svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true" style="width:26px;height:26px;"><line x1="3" y1="3" x2="12" y2="21" stroke="var(--ink)" stroke-width="4" stroke-linecap="round"/><line x1="21" y1="3" x2="12" y2="21" stroke="var(--accent)" stroke-width="4" stroke-linecap="round"/></svg>VEYLIX</div>
+      <div class="brand" style="font-size:1.9rem; margin-bottom:4px;"><img class="brand-mark" src="icon-192.png" alt="" style="width:30px;height:30px;">VEYLIX</div>
       <div class="auth-sub">Log in to sync your workouts.</div>
       <div class="form-grid">
         <label class="field">Email<input type="email" id="loginEmail" autocomplete="username" inputmode="email"></label>
@@ -325,7 +325,7 @@
 
 <div class="app" id="mainApp" style="display:none;">
   <header class="topbar">
-    <div class="brand"><svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true"><line x1="3" y1="3" x2="12" y2="21" stroke="var(--ink)" stroke-width="4" stroke-linecap="round"/><line x1="21" y1="3" x2="12" y2="21" stroke="var(--accent)" stroke-width="4" stroke-linecap="round"/></svg>VEYLIX</div>
+    <div class="brand"><img class="brand-mark" src="icon-192.png" alt="">VEYLIX</div>
     <div class="today-meta">
       <span class="sync-status" id="syncStatus"></span>
       <span class="today-date" id="todayDate"></span>
