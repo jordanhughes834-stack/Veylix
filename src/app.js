@@ -362,6 +362,43 @@ function pictograph(ratio, emoji){
   return out || emoji;
 }
 
+/* ============================= RENDER: HOME ============================= */
+function renderHome(){
+  var root = document.getElementById("view-home");
+  var html = "";
+
+  html += '<div class="card home-hero">'
+    + '<img src="icon-192.png" alt="" class="home-hero-mark">'
+    + '<div class="home-hero-title">VEYLIX</div>'
+    + '<p class="home-hero-sub">Your personal training log. Log every set, rate how it felt, and let the app work out what to do next time.</p>'
+    + '</div>';
+
+  html += '<div class="manage-section">';
+  html += '<div class="card home-card">'
+    + '<div class="section-title">Today</div>'
+    + '<p class="section-sub">Shows the exercises scheduled for today based on your weekly split. Log weight &times; reps per set, then rate how hard it felt from 1 (very easy) to 5 (maxed out). Each exercise shows a suggested weight/reps for next time, worked out from your last set and how hard it was.</p>'
+    + '</div>';
+  html += '<div class="card home-card">'
+    + '<div class="section-title">History</div>'
+    + '<p class="section-sub">Every past session, expandable to see each set. Pick an exercise at the top to see a trend chart of how the weight has moved over time.</p>'
+    + '</div>';
+  html += '<div class="card home-card">'
+    + '<div class="section-title">Manage</div>'
+    + '<p class="section-sub">Edit your weekly split, the exercises in each day type, and your exercise library. Also where you can export/import a backup of your data.</p>'
+    + '</div>';
+  html += '<div class="card home-card">'
+    + '<div class="section-title">Finishing a workout</div>'
+    + '<p class="section-sub">Tap "Finish workout" once you\'ve logged your sets for the day, and you\'ll get your total kg lifted plus a fun comparison - "that\'s like lifting 1.2&times; a silverback gorilla," that sort of thing.</p>'
+    + '</div>';
+  html += '<div class="card home-card">'
+    + '<div class="section-title">Your data</div>'
+    + '<p class="section-sub">Saved instantly on this device, and synced to the cloud in the background so it survives losing or resetting your phone.</p>'
+    + '</div>';
+  html += '</div>';
+
+  root.innerHTML = html;
+}
+
 /* ============================= RENDER: TODAY ============================= */
 function renderHeader(){
   document.getElementById("todayDate").textContent = fmtDateLong(todayISO());
@@ -1032,6 +1069,7 @@ function setActiveTab(tab){
 
 function renderAll(){
   renderHeader();
+  renderHome();
   renderToday();
   renderHistory();
   renderManage();

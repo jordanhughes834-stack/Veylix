@@ -234,6 +234,12 @@
 
   /* ---------- Manage ---------- */
   .manage-section{display:flex; flex-direction:column; gap:10px;}
+  .home-hero{padding:28px 20px; text-align:center; display:flex; flex-direction:column; align-items:center; gap:10px; margin-bottom:14px;}
+  .home-hero-mark{width:56px; height:56px; border-radius:14px;}
+  .home-hero-title{font-family:var(--font-display); font-size:1.8rem; letter-spacing:.04em;}
+  .home-hero-sub{color:var(--ink-dim); font-size:.86rem; max-width:34ch; line-height:1.45;}
+  .home-card{padding:16px;}
+  .home-card .section-sub{margin-top:6px; line-height:1.5;}
   .weekday-row{display:grid; grid-template-columns:70px 1fr; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--line);}
   .weekday-row:last-child{border-bottom:none;}
   .weekday-lbl{font-weight:700; font-size:.82rem;}
@@ -334,7 +340,8 @@
   </header>
 
   <main>
-    <section class="view active" id="view-today"></section>
+    <section class="view active" id="view-home"></section>
+    <section class="view" id="view-today"></section>
     <section class="view" id="view-history"></section>
     <section class="view" id="view-manage"></section>
   </main>
@@ -348,7 +355,11 @@
 
   <nav class="tabbar">
     <div class="tabbar-inner">
-      <button class="tab-btn active" data-tab="today">
+      <button class="tab-btn active" data-tab="home">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/></svg>
+        <span>Home</span>
+      </button>
+      <button class="tab-btn" data-tab="today">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="10" width="3" height="4"/><rect x="19" y="10" width="3" height="4"/><rect x="6" y="7" width="3" height="10"/><rect x="15" y="7" width="3" height="10"/><line x1="9" y1="12" x2="15" y2="12"/></svg>
         <span>Today</span>
       </button>

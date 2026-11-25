@@ -234,6 +234,12 @@
 
   /* ---------- Manage ---------- */
   .manage-section{display:flex; flex-direction:column; gap:10px;}
+  .home-hero{padding:28px 20px; text-align:center; display:flex; flex-direction:column; align-items:center; gap:10px; margin-bottom:14px;}
+  .home-hero-mark{width:56px; height:56px; border-radius:14px;}
+  .home-hero-title{font-family:var(--font-display); font-size:1.8rem; letter-spacing:.04em;}
+  .home-hero-sub{color:var(--ink-dim); font-size:.86rem; max-width:34ch; line-height:1.45;}
+  .home-card{padding:16px;}
+  .home-card .section-sub{margin-top:6px; line-height:1.5;}
   .weekday-row{display:grid; grid-template-columns:70px 1fr; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--line);}
   .weekday-row:last-child{border-bottom:none;}
   .weekday-lbl{font-weight:700; font-size:.82rem;}
@@ -334,7 +340,8 @@
   </header>
 
   <main>
-    <section class="view active" id="view-today"></section>
+    <section class="view active" id="view-home"></section>
+    <section class="view" id="view-today"></section>
     <section class="view" id="view-history"></section>
     <section class="view" id="view-manage"></section>
   </main>
@@ -348,7 +355,11 @@
 
   <nav class="tabbar">
     <div class="tabbar-inner">
-      <button class="tab-btn active" data-tab="today">
+      <button class="tab-btn active" data-tab="home">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/></svg>
+        <span>Home</span>
+      </button>
+      <button class="tab-btn" data-tab="today">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="10" width="3" height="4"/><rect x="19" y="10" width="3" height="4"/><rect x="6" y="7" width="3" height="10"/><rect x="15" y="7" width="3" height="10"/><line x1="9" y1="12" x2="15" y2="12"/></svg>
         <span>Today</span>
       </button>
@@ -738,6 +749,43 @@ function pictograph(ratio, emoji){
   if(frac > 0.15 && cap < 12) out += '<span style="opacity:' + (0.35+frac*0.5) + '">' + emoji + '</span>';
   if(full > 12) out += " +" + (full-12);
   return out || emoji;
+}
+
+/* ============================= RENDER: HOME ============================= */
+function renderHome(){
+  var root = document.getElementById("view-home");
+  var html = "";
+
+  html += '<div class="card home-hero">'
+    + '<img src="icon-192.png" alt="" class="home-hero-mark">'
+    + '<div class="home-hero-title">VEYLIX</div>'
+    + '<p class="home-hero-sub">Your personal training log. Log every set, rate how it felt, and let the app work out what to do next time.</p>'
+    + '</div>';
+
+  html += '<div class="manage-section">';
+  html += '<div class="card home-card">'
+    + '<div class="section-title">Today</div>'
+    + '<p class="section-sub">Shows the exercises scheduled for today based on your weekly split. Log weight &times; reps per set, then rate how hard it felt from 1 (very easy) to 5 (maxed out). Each exercise shows a suggested weight/reps for next time, worked out from your last set and how hard it was.</p>'
+    + '</div>';
+  html += '<div class="card home-card">'
+    + '<div class="section-title">History</div>'
+    + '<p class="section-sub">Every past session, expandable to see each set. Pick an exercise at the top to see a trend chart of how the weight has moved over time.</p>'
+    + '</div>';
+  html += '<div class="card home-card">'
+    + '<div class="section-title">Manage</div>'
+    + '<p class="section-sub">Edit your weekly split, the exercises in each day type, and your exercise library. Also where you can export/import a backup of your data.</p>'
+    + '</div>';
+  html += '<div class="card home-card">'
+    + '<div class="section-title">Finishing a workout</div>'
+    + '<p class="section-sub">Tap "Finish workout" once you\'ve logged your sets for the day, and you\'ll get your total kg lifted plus a fun comparison - "that\'s like lifting 1.2&times; a silverback gorilla," that sort of thing.</p>'
+    + '</div>';
+  html += '<div class="card home-card">'
+    + '<div class="section-title">Your data</div>'
+    + '<p class="section-sub">Saved instantly on this device, and synced to the cloud in the background so it survives losing or resetting your phone.</p>'
+    + '</div>';
+  html += '</div>';
+
+  root.innerHTML = html;
 }
 
 /* ============================= RENDER: TODAY ============================= */
@@ -1410,6 +1458,7 @@ function setActiveTab(tab){
 
 function renderAll(){
   renderHeader();
+  renderHome();
   renderToday();
   renderHistory();
   renderManage();
