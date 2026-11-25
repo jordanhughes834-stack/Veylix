@@ -2,7 +2,7 @@
 "use strict";
 
 /* ============================= CONSTANTS ============================= */
-var STORE_KEY = "gympt:v1:state";
+var STORE_KEY = "veylix:v1:state";
 var WEEKDAYS = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 var WEEKDAY_FULL = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 var RATE_LABELS = {1:"Very easy", 2:"Easy", 3:"Just right", 4:"Hard", 5:"Maxed out"};
@@ -122,9 +122,96 @@ function load(){
     else { state = seedState(); save(); }
   }catch(e){ state = seedState(); }
   if(!state.draft) state.draft = null;
+  if(!state._updatedAt) state._updatedAt = 0;
 }
 function save(){
+  state._updatedAt = Date.now();
   localStorage.setItem(STORE_KEY, JSON.stringify(state));
+  scheduleCloudPush();
+}
+
+/* ============================= CLOUD SYNC =============================
+ * Whole-state, last-write-wins sync against Supabase. localStorage (above)
+ * is always the fast, synchronous path - everything below is best-effort
+ * and never blocks the UI. A missing/zero _updatedAt always loses a
+ * comparison on purpose: it's what a freshly-reseeded local template looks
+ * like after iOS evicts localStorage, and that must never overwrite real
+ * cloud data.
+ */
+var SUPABASE_URL = "REPLACE_WITH_SUPABASE_PROJECT_URL";
+var SUPABASE_ANON_KEY = "REPLACE_WITH_SUPABASE_ANON_KEY";
+var SYNC_DEBOUNCE_MS = 800;
+
+var sb = (/^https:\/\//.test(SUPABASE_URL) && window.supabase)
+  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  : null;
+
+var currentSession = null;
+var syncTimer = null;
+
+function setSyncStatus(mode){
+  var el = document.getElementById("syncStatus");
+  if(!el) return;
+  el.className = "sync-status" + (mode==="syncing" ? " syncing" : mode==="offline" ? " offline" : "");
+  el.textContent = mode==="syncing" ? "Syncing…" : mode==="offline" ? "Offline" : mode==="synced" ? "Synced" : "";
+}
+
+function scheduleCloudPush(){
+  if(!sb || !currentSession) return;
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(pushCloudState, SYNC_DEBOUNCE_MS);
+}
+
+function pushCloudState(){
+  if(!sb || !currentSession) return;
+  clearTimeout(syncTimer);
+  setSyncStatus("syncing");
+  sb.from("veylix_state").upsert({user_id: currentSession.user.id, data: state, updated_at: new Date().toISOString()})
+    .then(function(res){ setSyncStatus(res.error ? "offline" : "synced"); })
+    .catch(function(){ setSyncStatus("offline"); });
+}
+
+// Fired on pagehide / tab-hidden, where there's no time left for the normal
+// debounced push to run - iOS can suspend the page within moments of this
+// event. keepalive lets the request survive page teardown; the supabase-js
+// client has no way to set that flag, so this talks to the REST API directly.
+function flushCloudStateKeepalive(){
+  if(!sb || !currentSession) return;
+  try{
+    fetch(SUPABASE_URL + "/rest/v1/veylix_state", {
+      method: "POST",
+      keepalive: true,
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": SUPABASE_ANON_KEY,
+        "Authorization": "Bearer " + currentSession.access_token,
+        "Prefer": "resolution=merge-duplicates"
+      },
+      body: JSON.stringify([{user_id: currentSession.user.id, data: state, updated_at: new Date().toISOString()}])
+    });
+  }catch(e){}
+}
+
+function pullCloudState(){
+  if(!sb || !currentSession) return Promise.resolve();
+  setSyncStatus("syncing");
+  return sb.from("veylix_state").select("data").eq("user_id", currentSession.user.id).maybeSingle()
+    .then(function(res){
+      if(res.error){ setSyncStatus("offline"); return; }
+      var cloud = res.data && res.data.data;
+      if(!cloud){ pushCloudState(); return; }
+      var cloudTs = cloud._updatedAt || 0;
+      var localTs = state._updatedAt || 0;
+      if(cloudTs > localTs){
+        state = cloud;
+        if(!state.draft) state.draft = null;
+        localStorage.setItem(STORE_KEY, JSON.stringify(state));
+        renderAll();
+      } else if(localTs > cloudTs){
+        pushCloudState();
+      }
+      setSyncStatus("synced");
+    }).catch(function(){ setSyncStatus("offline"); });
 }
 
 /* ============================= HELPERS ============================= */
@@ -894,7 +981,7 @@ function openExerciseForm(){
 /* ============================= BACKUP ============================= */
 function exportBackup(){
   var data = JSON.stringify(state, null, 2);
-  var filename = "gympt-backup-" + todayISO() + ".json";
+  var filename = "veylix-backup-" + todayISO() + ".json";
   if(window.claude && window.claude.downloads){
     window.claude.downloads.save({filename: filename, data: data}).then(function(){
       toast("Backup saved");
@@ -925,7 +1012,7 @@ function importBackup(file){
         toast("Backup imported");
       });
     }catch(e){
-      toast("That file doesn’t look like a GymPT backup");
+      toast("That file doesn’t look like a Veylix backup");
     }
   };
   reader.readAsText(file);
@@ -950,10 +1037,38 @@ function renderAll(){
   renderManage();
 }
 
-function init(){
+/* ============================= AUTH GATE ============================= */
+function showAuthGate(){
+  document.getElementById("authGate").style.display = "";
+  document.getElementById("mainApp").style.display = "none";
+}
+function showMainApp(){
+  document.getElementById("authGate").style.display = "none";
+  document.getElementById("mainApp").style.display = "";
+}
+
+function wireLoginForm(){
+  document.getElementById("loginBtn").addEventListener("click", function(){
+    var errEl = document.getElementById("loginError");
+    errEl.textContent = "";
+    if(!sb){ errEl.textContent = "Cloud sync isn't configured yet."; return; }
+    var email = document.getElementById("loginEmail").value.trim();
+    var pw = document.getElementById("loginPassword").value;
+    if(!email || !pw){ errEl.textContent = "Enter your email and password."; return; }
+    sb.auth.signInWithPassword({email:email, password:pw}).then(function(res){
+      if(res.error){ errEl.textContent = res.error.message; return; }
+      currentSession = res.data.session;
+      showMainApp();
+      startApp();
+    });
+  });
+}
+
+function startApp(){
   load();
   ensureDraft();
   renderAll();
+  pullCloudState();
 
   document.querySelectorAll(".tab-btn").forEach(function(b){
     b.addEventListener("click", function(){ setActiveTab(b.getAttribute("data-tab")); });
@@ -975,6 +1090,32 @@ function init(){
   });
   document.getElementById("finishModal").addEventListener("click", function(e){
     if(e.target.id === "finishModal") e.currentTarget.classList.add("hidden");
+  });
+
+  // iOS suspends backgrounded PWA pages almost immediately, so `online`
+  // listeners are unreliable - visibilitychange/pagehide/pageshow are the
+  // signals that actually fire on resume and on teardown.
+  document.addEventListener("visibilitychange", function(){
+    if(document.visibilityState === "hidden"){ flushCloudStateKeepalive(); }
+    else { pullCloudState(); }
+  });
+  window.addEventListener("pagehide", flushCloudStateKeepalive);
+  window.addEventListener("pageshow", function(){ pullCloudState(); });
+}
+
+function init(){
+  wireLoginForm();
+  if(!sb){
+    // No cloud configured yet - behave exactly like the fully-local app.
+    showMainApp();
+    startApp();
+    return;
+  }
+  sb.auth.getSession().then(function(res){
+    currentSession = res.data.session;
+    sb.auth.onAuthStateChange(function(_event, session){ currentSession = session; });
+    if(currentSession){ showMainApp(); startApp(); }
+    else { showAuthGate(); }
   });
 }
 
