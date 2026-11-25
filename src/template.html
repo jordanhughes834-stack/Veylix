@@ -207,6 +207,8 @@
   }
   .finish-bar-vol{font-family:var(--font-mono); font-size:.82rem; color:var(--ink-dim);}
   .finish-bar-vol strong{color:var(--ink); font-size:1rem;}
+  .finish-bar-timer{font-family:var(--font-mono); font-size:.82rem; color:var(--ink-dim);}
+  .finish-bar-timer strong{color:var(--accent); font-size:1rem;}
 
   /* ---------- History ---------- */
   .progress-picker{display:flex; gap:8px; align-items:center;}
@@ -349,6 +351,7 @@
   <div class="finish-bar" id="finishBar" style="display:none;">
     <div class="finish-bar-inner">
       <div class="finish-bar-vol">Session volume<br><strong id="finishBarVol">0 kg</strong></div>
+      <div class="finish-bar-timer">Elapsed<br><strong id="finishBarTimer">0:00</strong></div>
       <button class="btn btn-accent" id="finishWorkoutBtn">Finish workout</button>
     </div>
   </div>

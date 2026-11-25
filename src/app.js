@@ -45,52 +45,119 @@ var SVG_X = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-w
 var SVG_CHEV = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>';
 
 /* ============================= STARTER TEMPLATE ============================= */
-// Mon-Fri Chest / Back / Legs / Shoulders / Arms split, Sat/Sun rest.
+// Broad exercise library across Chest/Back/Legs/Shoulders/Arms/Core. Exercises
+// are no longer auto-assigned to a day - see draftExerciseIds() - this just
+// seeds a large catalog to pick from, grouped by muscle group in the add-
+// exercise picker. (Fixed a few pre-existing miscategorizations while here:
+// V-Bar/Single-Arm Pushdown and Preacher Curl are triceps/biceps work, not
+// Chest/Back; "DB Bench" under Shoulders was renamed to Arnold Press since
+// it's a distinct shoulder press variant, not a chest movement.)
 function starterTemplate(){
   var ex = [
-    {id:"bench-press",         name:"Bench Press",               category:"Chest",     increment:2.5},
-    {id:"incline-db-press",    name:"Incline DB Press",          category:"Chest",     increment:2},
-    {id:"pec-deck",            name:"Pec Deck / Mid Flys",       category:"Chest",     increment:5},
-    {id:"hl-cable-fly",        name:"High-to-Low Cable Fly",     category:"Chest",     increment:5},
-    {id:"vbar-pushdown",       name:"V-Bar Pushdown",            category:"Chest",     increment:2.5},
-    {id:"single-arm-pushdown", name:"Single-Arm Pushdown",       category:"Chest",     increment:2},
+    // ---- Chest ----
+    {id:"bench-press",          name:"Barbell Bench Press",        category:"Chest",     increment:2.5},
+    {id:"incline-barbell-press",name:"Incline Barbell Bench Press",category:"Chest",     increment:2.5},
+    {id:"decline-barbell-press",name:"Decline Barbell Bench Press",category:"Chest",     increment:2.5},
+    {id:"incline-db-press",     name:"Incline DB Press",           category:"Chest",     increment:2},
+    {id:"flat-db-fly",          name:"Flat Dumbbell Fly",          category:"Chest",     increment:2},
+    {id:"incline-db-fly",       name:"Incline Dumbbell Fly",       category:"Chest",     increment:2},
+    {id:"pec-deck",             name:"Pec Deck / Mid Flys",        category:"Chest",     increment:5},
+    {id:"chest-press-machine",  name:"Chest Press Machine",        category:"Chest",     increment:5},
+    {id:"hl-cable-fly",         name:"High-to-Low Cable Fly",      category:"Chest",     increment:5},
+    {id:"lh-cable-fly",         name:"Low-to-High Cable Fly",      category:"Chest",     increment:5},
+    {id:"weighted-dips",        name:"Weighted Dips",              category:"Chest",     increment:2.5},
+    {id:"push-ups",             name:"Push-Ups",                   category:"Chest",     increment:1.25},
+    {id:"svend-press",          name:"Svend Press",                category:"Chest",     increment:1.25},
 
-    {id:"barbell-row",         name:"Barbell Row",               category:"Back",      increment:2.5},
-    {id:"seated-row",          name:"Seated Row",                category:"Back",      increment:5},
-    {id:"single-arm-latpd",    name:"Single-Arm Lat Pulldown",   category:"Back",      increment:2.5},
-    {id:"face-pull",           name:"Face Pull",                 category:"Back",      increment:2.5},
-    {id:"preacher-curl",       name:"Preacher Curl",             category:"Back",      increment:1.25},
-    {id:"row-machine",         name:"Row Machine",               category:"Back",      increment:5},
+    // ---- Back ----
+    {id:"deadlift",             name:"Deadlift",                   category:"Back",      increment:5},
+    {id:"barbell-row",          name:"Barbell Row",                category:"Back",      increment:2.5},
+    {id:"pendlay-row",          name:"Pendlay Row",                category:"Back",      increment:2.5},
+    {id:"seated-row",           name:"Seated Row",                 category:"Back",      increment:5},
+    {id:"single-arm-latpd",     name:"Single-Arm Lat Pulldown",    category:"Back",      increment:2.5},
+    {id:"latpd-wide",           name:"Lat Pulldown (Wide Grip)",   category:"Back",      increment:2.5},
+    {id:"latpd-close",          name:"Lat Pulldown (Close Grip)",  category:"Back",      increment:2.5},
+    {id:"pullups",              name:"Pull-Ups",                   category:"Back",      increment:2.5},
+    {id:"chinups",              name:"Chin-Ups",                   category:"Back",      increment:2.5},
+    {id:"straight-arm-pulldown",name:"Straight-Arm Pulldown",      category:"Back",      increment:2.5},
+    {id:"face-pull",            name:"Face Pull",                  category:"Back",      increment:2.5},
+    {id:"row-machine",          name:"Row Machine",                category:"Back",      increment:5},
+    {id:"rack-pulls",           name:"Rack Pulls",                 category:"Back",      increment:5},
+    {id:"back-extension",       name:"Back Extension",             category:"Back",      increment:2.5},
+    {id:"barbell-shrug",        name:"Barbell Shrug",              category:"Back",      increment:5},
 
-    {id:"split-squats",        name:"Split Squats",              category:"Legs",      increment:2.5},
-    {id:"leg-press",           name:"Leg Press",                 category:"Legs",      increment:10},
-    {id:"inner-thigh",         name:"Inner Thigh Machine",       category:"Legs",      increment:5},
-    {id:"outer-thigh",         name:"Outer Thigh Machine",       category:"Legs",      increment:5},
-    {id:"calf-raises",         name:"Calf Raises",               category:"Legs",      increment:5},
-    {id:"leg-extensions",      name:"Leg Extensions",            category:"Legs",      increment:5},
-    {id:"hamstring-curls",     name:"Hamstring Curls",           category:"Legs",      increment:5},
+    // ---- Legs ----
+    {id:"back-squat",           name:"Barbell Back Squat",         category:"Legs",      increment:5},
+    {id:"front-squat",          name:"Front Squat",                category:"Legs",      increment:5},
+    {id:"romanian-deadlift",    name:"Romanian Deadlift",          category:"Legs",      increment:5},
+    {id:"split-squats",         name:"Split Squats",               category:"Legs",      increment:2.5},
+    {id:"bulgarian-split-squat",name:"Bulgarian Split Squat",      category:"Legs",      increment:2.5},
+    {id:"walking-lunges",       name:"Walking Lunges",             category:"Legs",      increment:2.5},
+    {id:"goblet-squat",         name:"Goblet Squat",               category:"Legs",      increment:2.5},
+    {id:"leg-press",            name:"Leg Press",                  category:"Legs",      increment:10},
+    {id:"hack-squat",           name:"Hack Squat",                 category:"Legs",      increment:5},
+    {id:"hip-thrust",           name:"Hip Thrust",                 category:"Legs",      increment:5},
+    {id:"step-ups",             name:"Step-Ups",                   category:"Legs",      increment:2.5},
+    {id:"inner-thigh",          name:"Inner Thigh Machine",        category:"Legs",      increment:5},
+    {id:"outer-thigh",          name:"Outer Thigh Machine",        category:"Legs",      increment:5},
+    {id:"leg-extensions",       name:"Leg Extensions",             category:"Legs",      increment:5},
+    {id:"hamstring-curls",      name:"Hamstring Curls (Lying)",    category:"Legs",      increment:5},
+    {id:"seated-leg-curl",      name:"Hamstring Curls (Seated)",   category:"Legs",      increment:5},
+    {id:"calf-raises",          name:"Calf Raises (Standing)",     category:"Legs",      increment:5},
+    {id:"seated-calf-raises",   name:"Calf Raises (Seated)",       category:"Legs",      increment:5},
 
-    {id:"db-bench",            name:"DB Bench",                  category:"Shoulders", increment:2},
-    {id:"shoulder-press",      name:"Shoulder Press",            category:"Shoulders", increment:2},
-    {id:"front-raise",         name:"Front Raise",               category:"Shoulders", increment:1.25},
-    {id:"lateral-raise",       name:"Lateral Raise",             category:"Shoulders", increment:1.25},
-    {id:"rear-delts",          name:"Rear Delts",                category:"Shoulders", increment:1.25},
-    {id:"overhead-press",      name:"Overhead",                  category:"Shoulders", increment:2.5},
+    // ---- Shoulders ----
+    {id:"overhead-press",       name:"Overhead Press (Barbell)",   category:"Shoulders", increment:2.5},
+    {id:"shoulder-press",       name:"Shoulder Press",             category:"Shoulders", increment:2},
+    {id:"db-bench",             name:"Arnold Press",               category:"Shoulders", increment:2},
+    {id:"machine-shoulder-press",name:"Machine Shoulder Press",    category:"Shoulders", increment:5},
+    {id:"front-raise",          name:"Front Raise",                category:"Shoulders", increment:1.25},
+    {id:"lateral-raise",        name:"Lateral Raise",              category:"Shoulders", increment:1.25},
+    {id:"cable-lateral-raise",  name:"Cable Lateral Raise",        category:"Shoulders", increment:1.25},
+    {id:"rear-delts",           name:"Rear Delts (DB Fly)",        category:"Shoulders", increment:1.25},
+    {id:"reverse-pec-deck",     name:"Reverse Pec Deck",           category:"Shoulders", increment:2.5},
+    {id:"upright-row",          name:"Upright Row",                category:"Shoulders", increment:2.5},
+    {id:"db-shrug",             name:"Dumbbell Shrug",             category:"Shoulders", increment:2},
 
-    {id:"skull-crushers",      name:"Skull Crushers",            category:"Arms",      increment:1.25},
-    {id:"curved-bar-pushdown", name:"Curved-Bar Push Downs",     category:"Arms",      increment:2.5},
-    {id:"vbar-overhead",       name:"V-Bar Overhead",            category:"Arms",      increment:2.5},
-    {id:"twentyones",          name:"21's",                      category:"Arms",      increment:1.25},
-    {id:"high-rep-curls",      name:"High Reps Low Weight Curls",category:"Arms",      increment:1.25},
-    {id:"zottman-curls",       name:"Zottman Curls",             category:"Arms",      increment:1.25},
-    {id:"rope-hammer-curls",   name:"Rope Hammer Curls",         category:"Arms",      increment:1.25}
+    // ---- Arms ----
+    {id:"barbell-curl",         name:"Barbell Curl",               category:"Arms",      increment:1.25},
+    {id:"ez-bar-curl",          name:"EZ-Bar Curl",                category:"Arms",      increment:1.25},
+    {id:"db-bicep-curl",        name:"Dumbbell Bicep Curl",        category:"Arms",      increment:1.25},
+    {id:"hammer-curl",          name:"Hammer Curl",                category:"Arms",      increment:1.25},
+    {id:"incline-db-curl",      name:"Incline Dumbbell Curl",      category:"Arms",      increment:1.25},
+    {id:"preacher-curl",        name:"Preacher Curl",              category:"Arms",      increment:1.25},
+    {id:"concentration-curl",   name:"Concentration Curl",         category:"Arms",      increment:1.25},
+    {id:"cable-curl",           name:"Cable Curl",                 category:"Arms",      increment:2.5},
+    {id:"high-rep-curls",       name:"High Reps Low Weight Curls", category:"Arms",      increment:1.25},
+    {id:"zottman-curls",        name:"Zottman Curls",              category:"Arms",      increment:1.25},
+    {id:"twentyones",           name:"21's",                       category:"Arms",      increment:1.25},
+    {id:"skull-crushers",       name:"Skull Crushers",             category:"Arms",      increment:1.25},
+    {id:"overhead-db-extension",name:"Overhead Tricep Extension",  category:"Arms",      increment:1.25},
+    {id:"curved-bar-pushdown",  name:"Curved-Bar Push Downs",      category:"Arms",      increment:2.5},
+    {id:"vbar-pushdown",        name:"V-Bar Pushdown",             category:"Arms",      increment:2.5},
+    {id:"vbar-overhead",        name:"V-Bar Overhead",             category:"Arms",      increment:2.5},
+    {id:"single-arm-pushdown",  name:"Single-Arm Pushdown",        category:"Arms",      increment:2},
+    {id:"rope-hammer-curls",    name:"Rope Hammer Curls",          category:"Arms",      increment:1.25},
+    {id:"close-grip-bench",     name:"Close-Grip Bench Press",     category:"Arms",      increment:2.5},
+    {id:"diamond-pushups",      name:"Diamond Push-Ups",           category:"Arms",      increment:1.25},
+
+    // ---- Core ----
+    {id:"hanging-leg-raise",    name:"Hanging Leg Raise",          category:"Core",      increment:1.25},
+    {id:"cable-crunch",         name:"Cable Crunch",               category:"Core",      increment:5},
+    {id:"russian-twist",        name:"Russian Twist",              category:"Core",      increment:1.25},
+    {id:"ab-wheel-rollout",     name:"Ab Wheel Rollout",           category:"Core",      increment:1.25},
+    {id:"weighted-situp",       name:"Weighted Sit-Up",            category:"Core",      increment:1.25},
+    {id:"decline-situp",        name:"Decline Sit-Up",             category:"Core",      increment:1.25},
+    {id:"flutter-kicks",        name:"Flutter Kicks",              category:"Core",      increment:1.25},
+    {id:"cable-woodchopper",    name:"Cable Woodchopper",          category:"Core",      increment:2.5}
   ];
   var dayTypes = {
-    "Chest":     ["bench-press","incline-db-press","pec-deck","hl-cable-fly","vbar-pushdown","single-arm-pushdown"],
-    "Back":      ["barbell-row","seated-row","single-arm-latpd","face-pull","preacher-curl","row-machine"],
-    "Legs":      ["split-squats","leg-press","inner-thigh","outer-thigh","calf-raises","leg-extensions","hamstring-curls"],
-    "Shoulders": ["db-bench","shoulder-press","front-raise","lateral-raise","rear-delts","overhead-press"],
-    "Arms":      ["skull-crushers","curved-bar-pushdown","vbar-overhead","twentyones","high-rep-curls","zottman-curls","rope-hammer-curls"]
+    "Chest":     ["bench-press","incline-barbell-press","incline-db-press","flat-db-fly","chest-press-machine","hl-cable-fly","weighted-dips"],
+    "Back":      ["deadlift","barbell-row","pendlay-row","seated-row","latpd-wide","single-arm-latpd","face-pull"],
+    "Legs":      ["back-squat","romanian-deadlift","leg-press","bulgarian-split-squat","leg-extensions","hamstring-curls","calf-raises"],
+    "Shoulders": ["overhead-press","shoulder-press","lateral-raise","cable-lateral-raise","rear-delts","upright-row"],
+    "Arms":      ["barbell-curl","hammer-curl","preacher-curl","skull-crushers","close-grip-bench","rope-hammer-curls","diamond-pushups"],
+    "Core":      ["hanging-leg-raise","cable-crunch","russian-twist","weighted-situp"]
   };
   var weekdays = {0:"Rest",1:"Chest",2:"Back",3:"Legs",4:"Shoulders",5:"Arms",6:"Rest"};
   return {exercises: ex, dayTypes: dayTypes, weekdays: weekdays};
@@ -238,6 +305,19 @@ function fmtNum(n){
   if(n==null || isNaN(n)) return "—";
   return (Math.round(n*100)/100).toString();
 }
+function fmtElapsed(ms){
+  var totalSec = Math.max(0, Math.floor(ms/1000));
+  var h = Math.floor(totalSec/3600);
+  var m = Math.floor((totalSec%3600)/60);
+  var s = totalSec%60;
+  return (h>0 ? h+":"+pad(m) : m) + ":" + pad(s);
+}
+function updateElapsedDisplay(){
+  var el = document.getElementById("finishBarTimer");
+  if(!el) return;
+  if(!state.draft || !state.draft.startedAt){ el.textContent = "0:00"; return; }
+  el.textContent = fmtElapsed(Date.now() - state.draft.startedAt);
+}
 function exerciseById(id){
   for(var i=0;i<state.exercises.length;i++){ if(state.exercises[i].id===id) return state.exercises[i]; }
   return null;
@@ -263,16 +343,25 @@ function toast(msg){
 function ensureDraft(){
   var iso = todayISO();
   if(!state.draft || state.draft.date !== iso){
-    state.draft = { date: iso, dayType: scheduledDayType(iso), entries: {}, extras: [] };
+    state.draft = { date: iso, dayType: scheduledDayType(iso), entries: {}, extras: [], startedAt: null };
     save();
   }
+  if(state.draft.startedAt === undefined) state.draft.startedAt = null;
   return state.draft;
 }
+// Exercises are added freely via the picker (see exerciseOptionsByCategory) -
+// today's scheduled day type is just a label, it doesn't restrict or
+// auto-populate which exercises show. Also includes anything with logged
+// entries even if it somehow isn't in extras, so an in-progress session
+// never silently drops a card with sets already on it.
 function draftExerciseIds(){
   var d = ensureDraft();
-  var list = (state.split.dayTypes[d.dayType] || []).slice();
-  d.extras.forEach(function(id){ if(list.indexOf(id)===-1) list.push(id); });
-  return list.filter(function(id){ return exerciseById(id); });
+  var seen = {};
+  var list = [];
+  d.extras.concat(Object.keys(d.entries)).forEach(function(id){
+    if(!seen[id] && exerciseById(id)){ seen[id] = true; list.push(id); }
+  });
+  return list;
 }
 function draftVolume(){
   return volumeOf(ensureDraft().entries);
@@ -284,12 +373,6 @@ function volumeOf(entries){
   });
   return total;
 }
-function draftSetCount(){
-  var d = ensureDraft(); var n = 0;
-  Object.keys(d.entries).forEach(function(exId){ n += d.entries[exId].length; });
-  return n;
-}
-
 /* ============================= PROGRESSION LOGIC ============================= */
 function findLastEntry(exId){
   var best = null;
@@ -419,36 +502,54 @@ function renderToday(){
   });
   html += '</div>';
 
-  if(d.dayType === "Rest" && draftExerciseIds().length===0){
+  if(!d.startedAt){
     html += '<div class="card rest-card">'
-      + '<div class="big">Rest day</div>'
-      + '<p>Nothing scheduled today. Pick a split day above if you’re training anyway, or come back tomorrow.</p>'
+      + '<div class="big">Ready to train?</div>'
+      + '<p>Start your workout to begin logging sets. You can log any mix of exercises - the day type above is just a label, not a restriction.</p>'
+      + '<button class="btn btn-accent btn-block" id="startWorkoutBtn">Start Workout</button>'
       + '</div>';
   } else {
     var ids = draftExerciseIds();
     ids.forEach(function(exId){
       html += renderExerciseCard(exId, d);
     });
-    html += '<div class="extra-row"><select id="extraExSelect"><option value="">+ Add another exercise…</option>'
-      + state.exercises.filter(function(e){ return ids.indexOf(e.id)===-1; }).map(function(e){
-          return '<option value="' + esc(e.id) + '">' + esc(e.name) + '</option>';
-        }).join("")
+    html += '<div class="extra-row"><select id="extraExSelect"><option value="">+ Add an exercise…</option>'
+      + exerciseOptionsByCategory(ids)
       + '</select></div>';
   }
 
   root.innerHTML = html;
 
   // finish bar
-  var setCount = draftSetCount();
   var bar = document.getElementById("finishBar");
-  if(setCount > 0){
+  if(d.startedAt){
     bar.style.display = "";
     document.getElementById("finishBarVol").textContent = fmtNum(draftVolume()) + " kg";
+    updateElapsedDisplay();
   } else {
     bar.style.display = "none";
   }
 
   renderHeader();
+}
+
+// Builds <optgroup> options grouped by muscle group, excluding ids already
+// in use - this is the free-mix exercise picker: pick any exercise from any
+// category, not just whatever's scheduled for today.
+function exerciseOptionsByCategory(excludeIds){
+  var byCat = {};
+  var order = [];
+  state.exercises.forEach(function(e){
+    if(excludeIds.indexOf(e.id)!==-1) return;
+    var cat = e.category || "Other";
+    if(!byCat[cat]){ byCat[cat] = []; order.push(cat); }
+    byCat[cat].push(e);
+  });
+  return order.map(function(cat){
+    return '<optgroup label="' + esc(cat) + '">'
+      + byCat[cat].map(function(e){ return '<option value="' + esc(e.id) + '">' + esc(e.name) + '</option>'; }).join("")
+      + '</optgroup>';
+  }).join("");
 }
 
 function renderExerciseCard(exId, d){
@@ -507,6 +608,14 @@ function handleTodayClick(e){
   if(chip){
     var d = ensureDraft();
     d.dayType = chip.getAttribute("data-daytype");
+    save();
+    renderToday();
+    return;
+  }
+  var startBtn = e.target.closest("#startWorkoutBtn");
+  if(startBtn){
+    var dStart = ensureDraft();
+    dStart.startedAt = Date.now();
     save();
     renderToday();
     return;
@@ -576,12 +685,14 @@ function finishWorkout(){
       d.entries[exId].forEach(function(s){ reps += s.reps; });
     }
   });
+  var durationMs = d.startedAt ? Math.max(0, Date.now() - d.startedAt) : 0;
   var session = {
     id: uid(),
     date: d.date,
     dayType: d.dayType,
     entries: entries,
-    volume: vol
+    volume: vol,
+    durationMs: durationMs
   };
   state.sessions.push(session);
   state.draft = null;
@@ -606,6 +717,7 @@ function showFinishModal(session, sets, reps){
     + '<div class="finish-stat"><b>' + Object.keys(session.entries).length + '</b><span>Exercises</span></div>'
     + '<div class="finish-stat"><b>' + sets + '</b><span>Sets</span></div>'
     + '<div class="finish-stat"><b>' + reps + '</b><span>Reps</span></div>'
+    + '<div class="finish-stat"><b>' + fmtElapsed(session.durationMs||0) + '</b><span>Time</span></div>'
     + '</div>';
   html += '<button class="btn btn-accent btn-block" id="closeFinishBtn">Done</button>';
   body.innerHTML = html;
@@ -688,7 +800,7 @@ function renderSessionCard(sess){
   var exCount = Object.keys(sess.entries).length;
   var html = '<div class="card session-card">';
   html += '<div class="session-head" data-toggle="' + sess.id + '">'
-    + '<div><div class="session-date">' + fmtDateShort(sess.date) + '</div><div class="session-sub">' + esc(sess.dayType) + ' · ' + exCount + ' exercises</div></div>'
+    + '<div><div class="session-date">' + fmtDateShort(sess.date) + '</div><div class="session-sub">' + esc(sess.dayType) + ' · ' + exCount + ' exercises' + (sess.durationMs ? ' · ' + fmtElapsed(sess.durationMs) : '') + '</div></div>'
     + '<div class="session-vol">' + fmtNum(sess.volume) + ' kg</div>'
     + '</div>';
   html += '<div class="session-body' + (open?" open":"") + '" data-body="' + sess.id + '">';
@@ -1063,7 +1175,7 @@ function setActiveTab(tab){
   document.querySelectorAll(".view").forEach(function(v){
     v.classList.toggle("active", v.id === "view-"+tab);
   });
-  document.getElementById("finishBar").style.display = (tab==="today" && draftSetCount()>0) ? "" : "none";
+  document.getElementById("finishBar").style.display = (tab==="today" && state.draft && state.draft.startedAt) ? "" : "none";
   window.scrollTo(0,0);
 }
 
@@ -1107,6 +1219,7 @@ function startApp(){
   ensureDraft();
   renderAll();
   pullCloudState();
+  setInterval(updateElapsedDisplay, 1000);
 
   document.querySelectorAll(".tab-btn").forEach(function(b){
     b.addEventListener("click", function(){ setActiveTab(b.getAttribute("data-tab")); });
